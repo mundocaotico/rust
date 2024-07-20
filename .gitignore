@@ -1,4 +1,2 @@
-/ls/target/
-/echo/target/
-/calculadora/target/
-/cat/target/
+/*/target/
+/*/target/debug/
