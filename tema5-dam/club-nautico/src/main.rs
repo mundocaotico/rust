@@ -2,7 +2,7 @@ use std::fmt;
 use std::fmt::{Display, Formatter, Pointer};
 use std::io::stdin;
 use std::process::exit;
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Barco {
     eslora: f32,
     matricula: String
@@ -15,23 +15,26 @@ struct Usuario {
 }
 
 impl Barco {
-    fn getEslora(&self) -> f32 {
+    fn get_eslora(&self) -> f32 {
         self.eslora
     }
-    fn getMatricula(&self) -> &str {
+    fn get_matricula(&self) -> &str {
         self.matricula.as_str()
     }
-    fn setEslora(&mut self, eslora: f32) {
+    fn set_eslora(&mut self, eslora: f32) {
         self.eslora = eslora;
     }
-    fn setMatricula(&mut self, matricula: String) {
+    fn set_matricula(&mut self, matricula: String) {
         self.matricula = matricula;
     }
-    fn new (eslora: f32, matricula: String) -> Barco {
-        Barco {eslora, matricula}
+    fn new () -> Self {
+        Barco {
+            eslora: 0.0,
+            matricula: String::new()
+        }
     }
-
 }
+
 /*
 impl Iterator for Barco {
     type Item = Barco;
@@ -42,19 +45,19 @@ impl Iterator for Barco {
 }
 */
 impl Usuario {
-    fn getNombre(&self) -> &str {
+    fn get_nombre(&self) -> &str {
         self.nombre.as_str()
     }
-    fn getDNI(&self) -> &str {
+    fn get_dni(&self) -> &str {
         self.dni.as_str()
     }
-    fn getBarco(&self) -> &Option<Barco> {
+    fn get_barco(&self) -> &Option<Barco> {
         &self.barco
     }
-    fn setNombre(&mut self, nombre: String) {
+    fn set_nombre(&mut self, nombre: String) {
         self.nombre = nombre;
     }
-    fn setDNI(&mut self, dni: String) {
+    fn set_dni(&mut self, dni: String) {
         self.dni = dni;
     }
     fn setBarco(&mut self, barco: Option<Barco>) {
@@ -75,7 +78,7 @@ impl Iterator for Usuario {
 */
 impl Display for Usuario {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f,"{}{}{:?}", self.getNombre(), self.getDNI(), self.getBarco())
+        write!(f,"{}\n{}\n{:?}", self.get_nombre(), self.get_dni(), self.get_barco())
     }
 }
 
@@ -120,7 +123,7 @@ fn main() {
 
                 match &dato {
                     x => {
-                        usuario.setDNI(String::from(x));
+                        usuario.set_dni(String::from(x));
                     },
                     _ => {
                         println!("Error en los datos");
@@ -135,7 +138,7 @@ fn main() {
 
                 match &dato {
                     x => {
-                        usuario.setNombre(String::from(x));
+                        usuario.set_nombre(String::from(x));
                     },
                     _ => {
                         println!("Error en los datos");
@@ -161,51 +164,100 @@ fn main() {
             3 => {
                 let mut dni: String = String::new();
                 let mut matricula: String = String::new();
-                dato.clear();
+                let mut dato = String::new();
 
                 println!("Que parametro quiere usar para buscar al usuario? (dni/matricula): ");
-
                 stdin().read_line(&mut dato).expect("Error al leer la entrada");
 
-                match &dato {
-                    x => {
-                        if String::from(x).trim().to_lowercase().eq("dni") {
+                let input = dato.trim().to_lowercase();
 
-                            dato.clear();
-                            println!("Introduce el dni del usuario: ");
+                match input.as_str() {
+                    "dni" => {
+                        dni.clear();
+                        println!("Introduce el dni del usuario: ");
+                        stdin().read_line(&mut dni).expect("Error al leer la entrada");
 
-                            stdin().read_line(&mut dato).expect("Error al leer la entrada");
+                        let dni_input = dni.trim();
 
-                            for mut u in usuarios.iter() {
-                                    if u.getDNI() == dato {
-                                        println!("{}", u);
-                                    }
+                        for u in usuarios.iter() {
+                            if u.get_dni().trim() == dni_input {
+                                println!("Nombre: {} DNI: {} Barco: {:?}", u.get_nombre(), u.get_dni(), u.get_barco());
                             }
-
-                        } else if String::from(x).trim().to_lowercase().eq("matricula") {
-
-                            dato.clear();
-                            println!("Introduce la matricula del barco: ");
-
-                            stdin().read_line(&mut dato).expect("Error al leer la entrada");
-
-                            for mut u in usuarios.iter() {
-                                // TODO: toString() de usuario
-                            }
-
-                        } else {
-                            println!("Usted no ha introducido correctamente el parametro requerido");
                         }
+                    },
+                    "matricula" => {
+                        matricula.clear();
+                        println!("Introduce la matricula del barco: ");
+                        stdin().read_line(&mut matricula).expect("Error al leer la entrada");
+
+                        let matricula_input = matricula.trim();
+
+                        for u in usuarios.iter() {
+                            if let Some(barco) = u.get_barco() {
+                                if barco.get_matricula().trim() == matricula_input {
+                                    println!("Nombre: {} DNI: {} Barco: {:?}", u.get_nombre(), u.get_dni(), u.get_barco());
+                                }
+                            }
+                        }
+                    },
+                    _ => {
+                        println!("Usted no ha introducido correctamente el parametro requerido");
                     }
                 }
-
             },
             4 => {
                 let mut dni = String::new();
-
-
+                let mut barco = Barco::new();
 
                 dato.clear();
+
+                println!("Introduce el dni del usuario: ");
+                stdin().read_line(&mut dato).expect("Error al leer la entrada");
+
+                dni = match dato.trim() {
+                    x => String::from(x),
+                    _ => {
+                        println!("Error con el dni");
+                        return;
+                    }
+                };
+
+                dato.clear();
+
+                println!("Introduce los datos del barco");
+                println!("Eslora: ");
+
+                stdin().read_line(&mut dato).expect("Error al leer la entrada");
+
+                match dato.trim().parse::<f32>() {
+                    Ok(n) => &barco.set_eslora(n),
+                    Err(_) => {
+                        println!("Error al establecer el valor de eslora");
+                        return;
+                    }
+                };
+
+                dato.clear();
+
+                println!("Matricula del barco: ");
+                stdin().read_line(&mut dato).expect("Error al leer la entrada");
+
+                match dato.trim() {
+                    x => &barco.set_matricula(String::from(x)),
+                    _ => {
+                        println!("Error al establecer la matricula del barco");
+                        return;
+                    }
+                };
+
+                barcos.push(barco.clone());
+
+                for u in usuarios.iter_mut() {
+                    if u.get_dni() == dni {
+                        let b = barco.clone();
+                        u.setBarco(Option::from(b)); // -- value used after being moved
+                    }
+                }
 
             },
             5 => {
@@ -230,27 +282,16 @@ fn main() {
                 };
 
                 for i in 0..usuarios.iter().len() {
-                    if usuarios.get(i).unwrap().dni == dato.trim() {
+                    if usuarios[i].dni.trim() == dato.trim() {
+                        println!("Indice del usuario: {}",i);
                         usuarios.remove(i);
                     }
                 }
             },
-                /*
-                for u in usuarios.iter_mut() {
-                        if u.getDNI() == dato.trim() {
-                                usuarios.remove(contador);
-                            } else {
-                                println!("Error en el contador: {}", contador);
-                            }
 
-                        }
-
-                    contador += 1;
-                },
-                 */
             7 => {
                 //let nuevoBarco;
-                let mut barco = Barco::new(0.0, String::new());
+                let mut barco = Barco::new();
                 let mut dni = String::new();
 
                 dato.clear();
@@ -258,7 +299,9 @@ fn main() {
                 println!("Introduce los datos del barco");
                 println!("Eslora: ");
 
-                barco.setEslora(match dato.trim().parse::<f32>() {
+                stdin().read_line(&mut dato).expect("Error en la entrada");
+
+                barco.set_eslora(match dato.trim().parse::<f32>() {
                     Ok(n) => {n},
                     Err(_) => {
                         println!("Formato de datos incorrecto");
@@ -271,7 +314,7 @@ fn main() {
                 println!("Matricula: ");
                 stdin().read_line(&mut dato).expect("Error al leer la entrada");
 
-                barco.setMatricula( match dato.trim() {
+                barco.set_matricula( match dato.trim() {
                     s => String::from(s),
                     _ => {
                         println!("Error con el tipo de datos");
@@ -296,8 +339,8 @@ fn main() {
                     }
                 };
 
-                for mut u in usuarios.iter_mut() {
-                        if u.getDNI() == dni {
+                for u in usuarios.iter_mut() {
+                        if u.get_dni() == dni {
                             //u.setBarco();
                         }
                 }
