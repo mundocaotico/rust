@@ -1,13 +1,17 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use crate::mascota::mascota::Mascota;
-#[derive(Clone)]
+use serde::{Deserialize, Serialize};
+
+
+#[derive(Clone,Serialize, Deserialize)]
 pub(crate) struct Persona {
     nombre: String,
     apellidos: String,
     edad: u8,
     mascota: Mascota
 }
+
 impl Persona {
 
     pub fn new(nombre: String, apellidos: String, edad: u8, mascota: Mascota) -> Self {

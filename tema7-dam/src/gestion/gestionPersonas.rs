@@ -1,7 +1,9 @@
-
+use std::fs::File;
 use crate::persona::persona::Persona;
 use crate::mascota::mascota::Mascota;
 use std::io;
+use std::io::BufWriter;
+
 
 pub struct gestionPersonas {
     personas: Vec<Persona>
@@ -13,7 +15,9 @@ impl gestionPersonas {
             personas: Vec::new()
         }
     }
-    pub fn crearPersonas(&mut self) {
+    pub fn crear_personas(&mut self) {
+        let ruta = "personas.dat";
+        let mut fichero: Option<File> = None;
         let mut nombre = String::new();
         let mut nombre_mascota = String::new();
         let mut tipo_mascota = String::new();
@@ -77,10 +81,10 @@ impl gestionPersonas {
             // Introducimos los datos
 
             self.personas.push(Persona::new(
-                String::from(&nombre),
-                String::from(&apellidos),
+                String::from(nombre.trim()),
+                String::from(apellidos.trim()),
                 edad,
-                Mascota::new(String::from(&nombre_mascota), String::from(&tipo_mascota))));
+                Mascota::new(String::from(nombre_mascota.trim()), String::from(tipo_mascota.trim()))));
 
             nombre.clear();
             apellidos.clear();
@@ -88,18 +92,31 @@ impl gestionPersonas {
             nombre_mascota.clear();
             tipo_mascota.clear();
 
+        }
 
+        // Parte de ficheros
+
+        fichero = match File::open(ruta) {
+            Ok(f) => Some(f),
+            Err(_) => {
+                Some(File::create(ruta).unwrap())
+            }
+        };
+
+        if let Some(f) = fichero {
+            let writer = BufWriter::new(f);
+            serde_json::to_writer_pretty(writer, &self.personas).unwrap()
         }
 
     }
-    pub fn mostrarPersonas(&self) {
+    pub fn mostrar_personas(&self) {
         let personas = &self.personas;
         for p in personas.iter() {
             println!("{}",p);
         }
 
     }
-    pub fn buscarPersona(&self) {
+    pub fn buscar_persona(&self) {
         let mut nombre = String::new();
         let mut apellidos = String::new();
         println!("Introduce los siguientes datos (nombre y apellidos)");

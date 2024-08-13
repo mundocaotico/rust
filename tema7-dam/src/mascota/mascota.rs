@@ -1,7 +1,8 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
+#[derive(Clone,Serialize, Deserialize)]
 pub(crate) struct Mascota {
     nombre: String,
     tipoMascota: String

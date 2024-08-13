@@ -30,13 +30,13 @@ fn main() {
 
         match opcion {
             1 => {
-                gestion_personas.crearPersonas();
+                gestion_personas.crear_personas();
             },
             2 => {
-                gestion_personas.mostrarPersonas();
+                gestion_personas.mostrar_personas();
             },
             3 => {
-                gestion_personas.buscarPersona();
+                gestion_personas.buscar_persona();
             },
             4 => {
                 gestion_personas.salir();
